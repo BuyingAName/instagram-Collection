@@ -56,19 +56,25 @@ var promiseWhile = function(condition, action) {
 	});	
 };
 
+app.get('/', function(req, res) {
+	res.sendfile('index.html');
+});
+
 app.get("/getCollection", function(req, res) {
 	//Get the posts from the database
+	console.log(req.query);
 	if(!validateParams(req.query.tag, req.query.startDate, req.query.endDate)) res.status(400).send('Invalid Parameters');
 	else {
 		var queryConfig = {
-			text: 'SELECT * FROM posts WHERE tag = $1 and tagtime BETWEEN $2 AND $3',
-			values: [req.query.tag, req.query.startDate, req.query.endDate]
+			text: 'SELECT * FROM posts', //WHERE tag = $1 and tagtime BETWEEN $2 AND $3',
+			//values: [req.query.tag, req.query.startDate, req.query.endDate]
 		};
 		client.query(queryConfig, function(err, result) {
 			if (err) {
 				res.status(500).send('Database Query Error');
 				console.log(err);
 			} else {
+				console.log(result.rows);
 				res.send(result.rows);
 			}
 		});
@@ -83,11 +89,21 @@ app.post("/createCollection", function(req, res) {
 	var startDate = Math.floor(new Date(2016, 1).getTime() / 1000); 
 	//'1477700000';
 	var endDate = Math.floor(Date.now() / 1000);
+	console.log(req.body.tag);
 
 	if (tag === req.body.tag) console.log("USING REQ.BODY");
+	
+	if(!validateParams(req.body.tag, req.body.startDate, req.body.endDate)){
+		res.status(400).send('Invalid Parameters');
+		return;
+	}
+
+	tag = req.body.tag;
 	var url = "https://api.instagram.com/v1/tags/" + tag + "/media/recent/?access_token=" + ACCESS_TOKEN;
 	console.log('URL ' + counter + ' ' + url);
 	var collections = [];
+
+	startDate = req.body.startDate;
 	
 	promiseWhile(function() {
 		//keep paginating through endpoint if we have the next url and the need the next data
@@ -154,7 +170,7 @@ app.post("/createCollection", function(req, res) {
 				posts.forEach((post) => {
 					 var sql = 'INSERT INTO posts(username, tagtime, tag, link, type, url) values ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING';
 					 client.query(sql, [post.username, post.tagtime, post.tag, post.link, post.type, post.url]);
-					 //console.log([post.username, post.tagtime, post.tag, post.link, post.type, post.url]);
+					 console.log([post.username, post.tagtime, post.tag, post.link, post.type, post.url]);
 				}); 
 				//insert posts into DB
 			});
