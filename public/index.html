@@ -4,10 +4,11 @@
     <title>Instagram Collection Creater</title>
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.13/daterangepicker.min.css" />
+	<link rel="stylesheet" href="/style.css"/>
 	
 	<script src="//code.jquery.com/jquery-3.1.1.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.2/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.13/daterangepicker.min.js"></script>
 	
@@ -15,21 +16,13 @@
 	<script src="js/ng-infinite-scroll.min.js"></script>
 	<script src='js/app.js'></script>
 
-<style type="text/css">
-  .css-form input.ng-invalid.ng-touched {
-    background-color: #FA787E;
-  }
-
-  .css-form input.ng-valid.ng-touched {
-    background-color: #78FA89;
-  }
-</style>
 </head>
 
 <body ng-controller="mainController">
 	<div class="container">
-		<div class="header">
-			<h1> Create and View Collections of Instagram Posts</h1>
+		<div class="header margin-bottom30">
+			<h1 class="center-text"> Instagram Collection</h1>
+			<h4 class="center-text"> Create and view collections of Instagram posts with a certain hashtag between dates</h4>
 		</div>
 	</div>
 	<div class="container">
@@ -43,7 +36,7 @@
 							<span class="input-group-addon" id="basic-addon1">#</span>
 							<input type="text" class="form-control" ng-model="tag" name="tag" required hashtag><br />
 						</div>
-						<span ng-show="form.tag.$error.hashtag">Hashtags cannot contain spaces or special characters</span>
+						<span ng-show="form.tag.$error.hashtag" ng-cloak>Hashtags cannot contain spaces or special characters</span>
 					</div>
 
 					<div class='col-md-4'>
@@ -51,19 +44,28 @@
 						<input date-range-picker class="form-control date-picker" type="text" ng-model="date" min="'2010-10-05'" max="maxDate" clearable="true" required/>
 					</div>
 					<div class="col-md-4">
-						<button type= "submit" class ='btn btn-primary' ng-disabled="form.$invalid" ng-click="create(tag,date)"> Create Collection</button>
-						<button type= "submit" class ='btn btn-primary' ng-disabled="form.$invalid" ng-click="view(tag,date)"> View Collection</button>
+						<button type= "submit" class ='btn btn-primary margin-top25' ng-disabled="form.$invalid" ng-click="create(tag,date)"> Create Collection</button>
+						<button type= "submit" class ='btn btn-primary margin-top25' ng-disabled="form.$invalid" ng-click="view(tag,date)"> View Collection</button>
 					</div>
 				</div>
 			</div>
 		</form>
 	</div>
-	<div class = "container" infinite-scroll="loadMore()" infinite-scroll-disabled="posts.length === data.length">
-		<div class ="col-md-4" ng-repeat="post in posts">
-			<div>Posted by: {{ post.username }} <a ng-href="{{ post.link }}">Intstagram Link</a></div>
-			<img ng-if="post.type === 'image'" ng-src="{{post.url}}" class="img-thumbnail">
-			<video ng-if="post.type === 'video'" ng-src="{{post.url | trusted}}" controls>
-		<div>
+	
+	<div class="container margin-bottom15" ng-show="btnClicked" ng-cloak>
+		<h2 class="center-text">{{ message }}</h2>
 	</div>
+
+	<div class = "container" infinite-scroll="loadMore()" infinite-scroll-disabled="posts.length === data.length" ng-if="data.length > 0" ng-cloak>
+		<div class ="col-md-4 margin-bottom15" ng-repeat="post in posts">
+			<div class="display-inline-block">
+			<span>Posted by: <span class="username"> {{ post.username }} </span></span>
+			<a class="float-right" ng-href="{{ post.link }}" target="_blank">Instagram Link</a>
+			<img ng-if="post.type === 'image'" ng-src="{{post.url}}" class="post">
+			<video ng-if="post.type === 'video'" ng-src="{{post.url | trusted}}" controls height="330" width="330" class="post">
+			</div>
+		</div>
+	</div>
+
 </body>
 </html>

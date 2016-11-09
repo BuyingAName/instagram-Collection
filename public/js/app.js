@@ -1,32 +1,46 @@
 var app = angular.module('collections', ['daterangepicker', 'infinite-scroll']);
 
 app.controller('mainController', ($scope, $http) => {
+	
 	$scope.date = {
 		startDate: null,
 		endDate: null
 	};
+	$scope.btnClicked = false;
 	$scope.posts = [];
 	$scope.data = [];
-	$scope.maxDate = moment();	
+	$scope.maxDate = moment();
 
+	//Call CreateCollection API when the Create button is clicked
 	$scope.create = function(tag, daterange) {
+		
+		$scope.btnClicked = true;
+		$scope.posts = [];
+		$scope.data = [];
+		
 		var url = '/createCollection';
 		var data = {
 			tag: tag,
 			startDate: daterange.startDate.unix(),
 			endDate: daterange.endDate.unix(),
 		};
+		
 		$http.post(url,data)
 		.then(function(response) {
-			console.log(response);
-			//$scope.posts = response.data;
+			$scope.message = "Successfully created the collection, click the View button to see the posts";
 		}, function(error){
+			$scope.message = "Error creating collection, please try again or use a different hastag or date range";
 			console.log(error);
 		});
 	};
 
+	//Call getCollection API when the View button is clicked
 	$scope.view = function(tag, daterange) {
-		console.log(tag + ',' + daterange.startDate.unix() + ',' + daterange.endDate.unix());
+		
+		$scope.btnClicked = true;
+		$scope.posts = [];
+		$scope.data = [];
+		
 		var config = {
 			method: 'GET',
 			url: '/getCollection',
@@ -38,14 +52,19 @@ app.controller('mainController', ($scope, $http) => {
 		};
 		$http(config)
 		.then(function(response) {
-			console.log(response);
 			$scope.data = response.data;
+			if(response.data.length == 0) {
+				$scope.message = 'No Results, create a new collection or change the hashtag or date range.';
+			} else {
+				$scope.message = response.data.length == 1 ? 'This Collection contains 1 post' : 'This Collection contains ' + response.data.length + ' posts';
+			}
 		}, function(error){
+			$scope.message = "Error collecting posts, please try again or use a different hastag or date range";
 			console.log(error);
 		});
 	};
 	
-	//Loads 6 more elements into the infinite scroll
+	//Loads up to 6 more posts at the bottom of the page for infinite scrolling
 	$scope.loadMore = function() {
 		var postsLength = $scope.posts.length;
 		
@@ -54,7 +73,6 @@ app.controller('mainController', ($scope, $http) => {
 		} else {
 			$scope.posts.push.apply($scope.posts, $scope.data.slice(postsLength, postsLength +6));
 		}
-		console.log('loaded more elements');
 	};
 });
 
@@ -64,14 +82,19 @@ app.directive('hashtag', function() {
 		require: 'ngModel',
 		link: function(scope, elm, attrs, ctrl) {
 			ctrl.$validators.hashtag = function(modelValue, viewValue) {
-				if(ctrl.$isEmpty(modelValue)) return true;
-				if(/[$-/:-?{-~!"^`\[\]\s]/.test(modelValue)) return false;
+				if(ctrl.$isEmpty(modelValue)){
+					return true;
+				}
+				if(/[$-/:-?{-~!"^`\[\]\s]/.test(modelValue)) {
+					return false;
+				} 
 				return true;
 			};
 		}
 	}
 });
 
+//makes angular trust and load .mp4 urls in video tag
 app.filter('trusted', ['$sce', function ($sce) {
     return function(url) {
         return $sce.trustAsResourceUrl(url);

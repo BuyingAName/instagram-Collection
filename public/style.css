@@ -1,0 +1,39 @@
+.margin-top25 {
+	margin-top:25px;
+}
+
+.margin-bottom15 {
+	margin-bottom:15px;
+}
+
+.margin-bottom30 {
+	margin-bottom:30px;
+}
+
+.center-text {
+	text-align:center;
+}
+
+.username {
+	font-weight: 600;
+}
+
+.display-block {
+	display: block;
+}
+
+.display-inline-block {
+	display: inline-block;
+}
+
+.float-right {
+	float:right;
+}
+.post {
+	display:block;
+	padding: 4px;
+	line-height: 1.42857;
+	background-color: #FFF;
+	border: 1px solid #DDD;
+	border-radius: 4px;
+}
