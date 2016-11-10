@@ -9,7 +9,7 @@ client.connect();
 
 function getPosts(tag, startDate, endDate, callback){
 	var queryConfig = {
-		text: 'SELECT * FROM posts WHERE tag = $1 and tagtime BETWEEN $2 AND $3',
+		text: 'SELECT * FROM posts WHERE tag = $1 AND tagtime BETWEEN $2 AND $3 ORDER BY tagtime DESC',
 		values: [tag, startDate, endDate]
 	};
 	client.query(queryConfig, function(err, result) {
@@ -17,14 +17,43 @@ function getPosts(tag, startDate, endDate, callback){
 	});	
 };
 
-function insertPost(post, callback){
-	var sql = 'INSERT INTO posts(username, tagtime, tag, link, type, url) values ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING';
-	client.query(sql, [post.username, post.tagtime, post.tag, post.link, post.type, post.url], function(err, result) {
+function insertPosts(posts, callback){
+	//build the SQL values statement to insert all posts at once
+	var params = [];
+	var chunks = [];
+	posts.forEach((post) => {
+		var valueClause = [];
+		//need to insert in order :(username, tagtime, tag, link, type, url)
+		params.push(post.username);
+		valueClause.push('$' + params.length);
+		
+		params.push(post.tagtime);
+		valueClause.push('$' + params.length);
+		
+		params.push(post.tag);
+		valueClause.push('$' + params.length);
+		
+		params.push(post.link);
+		valueClause.push('$' + params.length);
+		
+		params.push(post.type);
+		valueClause.push('$' + params.length);
+		
+		params.push(post.url);
+		valueClause.push('$' + params.length);
+		
+		chunks.push('(' + valueClause.join(', ') + ')')
+	});
+
+	//ON CONFLICT DO NOTHING so that if the row is already in the DB, Postgres just doesn't insert it and does not throw duplicate key value error
+	// since the primary key in the db is (username, tagtime, tag, link, type, url) and each post is unique
+	var q = 'INSERT INTO posts(username, tagtime, tag, link, type, url) VALUES' + chunks.join(', ') + ' ON CONFLICT DO NOTHING';
+	client.query(q, params, function(err, result) {
 		callback(err,result);
 	});
 };
 
 module.exports = {
 	getPosts: getPosts,
-	insertPost: insertPost
+	insertPosts: insertPosts
 };

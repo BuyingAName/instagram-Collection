@@ -15,6 +15,7 @@ app.controller('mainController', ($scope, $http) => {
 	$scope.create = function(tag, daterange) {
 		
 		$scope.btnClicked = true;
+		$scope.message = "Creating Collection, please wait...";
 		$scope.posts = [];
 		$scope.data = [];
 		
@@ -29,8 +30,12 @@ app.controller('mainController', ($scope, $http) => {
 		.then(function(response) {
 			$scope.message = "Successfully created the collection, click the View button to see the posts";
 		}, function(error){
-			$scope.message = "Error creating collection, please try again or use a different hastag or date range";
-			console.log(error);
+			if(error.status == 507) {
+				$scope.message = "Error: Collection has too many posts, try changing the date or using a less popular hashtag";
+			} else {
+				$scope.message = "Error creating collection, please try again or use a different hastag or date range";
+				console.log(error);
+			}
 		});
 	};
 

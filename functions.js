@@ -13,16 +13,18 @@ function getContent(url) {
 };
 
 function validateParams(tag, start, end) {
-	//Hashtags cannot contain special characters or spaces
+	//Hashtags cannot contain special characters or spaces, but can have underscores
 	var regex = new RegExp('[$-/:-?{-~!"^`\[\]\s]');
 	if(regex.test(tag)) return false;
+	//Start and End dates must be number of seconds since unix epoch
 	if(start %1 != 0 || start < 0) return false;
 	if(end %1 != 0 || end < 0) return false;
 	if(start >= end) return false;
 	return true;
 };
 
-//While loop using promises
+//While loop using promises, loops until the condition evaluates to false
+//Adapted from http://blog.victorquinn.com/javascript-promise-while-loop
 function promiseWhile(condition, action) {
 	return new Promise((resolve, reject) => {
 		var loop = function() {

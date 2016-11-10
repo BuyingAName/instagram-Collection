@@ -59,7 +59,7 @@
 	<div class = "container" infinite-scroll="loadMore()" infinite-scroll-disabled="posts.length === data.length" ng-if="data.length > 0" ng-cloak>
 		<div class ="col-md-4 margin-bottom15" ng-repeat="post in posts">
 			<div class="display-inline-block">
-			<span>Posted by: <span class="username"> {{ post.username }} </span></span>
+			<span class="username"> {{ post.username }} </span>
 			<a class="float-right" ng-href="{{ post.link }}" target="_blank">Instagram Link</a>
 			<img ng-if="post.type === 'image'" ng-src="{{post.url}}" class="post">
 			<video ng-if="post.type === 'video'" ng-src="{{post.url | trusted}}" controls height="330" width="330" class="post">
